@@ -1,9 +1,9 @@
-import fs from 'fs-extra'
+const fs = require('fs-extra')
 
-export const isExist = (filePath) => {
+module.exports.isExist = (filePath) => {
   return new Promise((resolve, reject) => {
     fs.stat(filePath, (e) => {
-      if (e.code === 'ENOENT') {
+      if (e && e.code === 'ENOENT') {
         resolve(false)
       } else {
         resolve(true)
@@ -12,7 +12,7 @@ export const isExist = (filePath) => {
   })
 }
 
-export const listDir = (folderPath) => {
+module.exports.listDir = (folderPath) => {
   return new Promise((resolve, reject) => {
     fs.readdir(folderPath, (e, files) => {
       if (e) {
@@ -27,10 +27,9 @@ export const listDir = (folderPath) => {
   })
 }
 
-export const getChunkList = async (filePath, tmpPath, cb) => {
+module.exports.getChunkList = async (filePath, tmpPath, cb) => {
   const isFileExist = await isExist(filePath)
   if (isFileExist) {
-    // TODO
     cb({
       stat: 1,
       file: {

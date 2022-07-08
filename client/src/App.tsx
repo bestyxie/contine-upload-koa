@@ -11,21 +11,22 @@ function App() {
     formData.append('file', e.target.files?.[0] ?? '')
     const file = e.target.files?.[0]
     if (!file) return
-    const defaultChunkSize = 100
+    const defaultChunkSize = 1024
     const { fileHash, fileReader } = await splitFile(file, defaultChunkSize)
     console.log(fileHash)
     console.log(fileReader)
     const requestList = []
     const chunkCount = file.size / defaultChunkSize
     for (let i = 0; i< chunkCount; i++) {
-      // TODO
       const form = new FormData()
-      form.append('data', file.slice(i*defaultChunkSize))
+      form.append('file', file.slice(i*defaultChunkSize))
       form.append('total', chunkCount.toString())
       form.append('index', i.toString())
       form.append('fileMd5Value', fileHash)
-      requestList.push(axios.post('/upload', form))
+      requestList.push(axios.post('http://localhost:8000/upload', form))
     }
+    const res = await Promise.all(requestList)
+    console.log(res)
     // try {
     //   const res = await axios.post('http://localhost:8000/upload', formData, {
     //     headers: {

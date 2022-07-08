@@ -4,10 +4,11 @@ const Route = require('koa-router')
 const bodyParser = require('koa-bodyparser')
 const koaBody = require('koa-body')
 const multer = require('@koa/multer')
-const fs = require('node:fs/promises')
+const fs = require('fs-extra')
 const path = require('path')
 const cors = require('koa2-cors');
-const constants = require('./consts')
+const constants = require('./consts.js')
+const utils = require('./utils.js')
 
 const upload = multer()
 
@@ -22,9 +23,17 @@ router.get('/users', (ctx, next) => {
     ctx.body = 'Wendy'
   })
   .post('/upload', upload.single('file'), async (ctx, next) => {
-    console.log(ctx.request.file)
-    console.log(__dirname, path.resolve(__dirname, '../public/uploads'))
-    await fs.writeFile(path.resolve(__dirname, `../public/uploads/${ctx.request.file.originalname}`), ctx.request.file.buffer)
+    const file = ctx.request.file
+    const fileMd5Value = ctx.request.body.fileMd5Value
+    const index = ctx.request.body.index
+    const folderPath = path.resolve(__dirname, `../public/uploads/${fileMd5Value}`)
+    const isFolderExist = await utils.isExist(folderPath)
+    if (isFolderExist) {
+      await fs.writeFile(path.resolve(folderPath, index + ''), file.buffer)
+    } else {
+      fs.ensureDirSync(folderPath)
+      await fs.writeFile(path.resolve(folderPath, index + ''), file.buffer)
+    }
     ctx.body = 'uploaded'
     next()
   })

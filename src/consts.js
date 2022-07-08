@@ -1,3 +1,3 @@
 const path = require('path')
 
-export const uploadPath = path.resolve(__dirname, '../public/uploads')
+module.exports.uploadPath = path.resolve(__dirname, '../public/uploads')
