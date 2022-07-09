@@ -46,8 +46,22 @@ router.get('/users', (ctx, next) => {
       path.join(constants.uploadPath, fileMd5),
       (data) => {
         ctx.body = data
+        next()
       }
     )
+  })
+  .get('/merge', async (ctx, next) => {
+    const fileName = ctx.request.query.fileName
+    const fileMd5Value = ctx.request.query.fileMd5Value
+    const folderPath = path.resolve(__dirname, `../public/uploads/${fileMd5Value}`)
+    const fileList = await utils.listDir(folderPath)
+    const filePath = path.resolve(__dirname, `../public/uploads/${fileName}`)
+    fileList.forEach(async (file, i) => {
+      const readable = fs.createReadStream(path.join(folderPath, i + ''))
+      await utils.mergeFile(filePath, path.join(folderPath, i + ''))
+    });
+    ctx.body = 'done'
+    next()
   })
 
 app

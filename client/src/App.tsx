@@ -26,7 +26,14 @@ function App() {
       requestList.push(axios.post('http://localhost:8000/upload', form))
     }
     const res = await Promise.all(requestList)
-    console.log(res)
+    // console.log(res)
+    const a = await axios.get('http://localhost:8000/merge', {
+      params: {
+        fileName: file.name,
+        fileMd5Value: fileHash,
+      },
+    })
+    console.log(a)
     // try {
     //   const res = await axios.post('http://localhost:8000/upload', formData, {
     //     headers: {
