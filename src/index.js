@@ -56,10 +56,11 @@ router.get('/users', (ctx, next) => {
     const folderPath = path.resolve(__dirname, `../public/uploads/${fileMd5Value}`)
     const fileList = await utils.listDir(folderPath)
     const filePath = path.resolve(__dirname, `../public/uploads/${fileName}`)
-    fileList.forEach(async (file, i) => {
-      const readable = fs.createReadStream(path.join(folderPath, i + ''))
-      await utils.mergeFile(filePath, path.join(folderPath, i + ''))
-    });
+    const writable = fs.createWriteStream(filePath, { autoClose: false })
+    writable.on('close', () => {
+      fs.rm(folderPath, { recursive: true, force: true })
+    })
+    utils.mergeRecursive(fileList, writable, folderPath)
     ctx.body = 'done'
     next()
   })

@@ -1,4 +1,5 @@
 const fs = require('fs-extra')
+const path = require('path')
 
 module.exports.isExist = (filePath) => {
   return new Promise((resolve, reject) => {
@@ -53,17 +54,36 @@ module.exports.getChunkList = async (filePath, tmpPath, cb) => {
   }
 }
 
-module.exports.mergeFile = (source, target) => {
-  return new Promise((resolve, reject) => {
-    const newFile = fs.ensureFileSync(target)
-    const writable = fs.createWriteStream(target)
-    const readable = fs.createReadStream(source)
-    readable.pipe(writable)
-    readable.on('end', () => {
-      resolve(true)
-    })
-    readable.on('error', (e) => {
-      reject(e)
-    })
+const mergeRecursive = (fileList, fileWriteStream, sourceFilePath) => {
+  if (!fileList.length) {
+    return fileWriteStream.close()
+  }
+  const currentFile = path.resolve(__dirname, sourceFilePath, fileList.shift())
+  const currentReadStream = fs.createReadStream(currentFile)
+
+  currentReadStream.pipe(fileWriteStream, { end: false })
+  currentReadStream.on('end', () => {
+    mergeRecursive(fileList, fileWriteStream, sourceFilePath)
+  })
+  currentReadStream.on('error', (e) => {
+    console.error(e)
+    fileWriteStream.close()
   })
 }
+
+module.exports.mergeRecursive = mergeRecursive
+
+// module.exports.mergeFile = (fileList, target) => {
+//   const writeStream = fs.createWriteStream(filePath, { autoClose: false })
+//   mergeRecursive(fileList, writeStream, )
+//   return new Promise((resolve, reject) => {
+//     const readable = fs.createReadStream(source)
+//     readable.pipe(writable)
+//     readable.on('end', () => {
+//       resolve(true)
+//     })
+//     readable.on('error', (e) => {
+//       reject(e)
+//     })
+//   })
+// }
