@@ -11,7 +11,7 @@ export const splitFile = (file: File, defaultChunkSize: number = 100): Promise<{
     const fileReader = new FileReader()
 
     fileReader.onload = function (e) {
-      console.log('read chunk nr', currentChunk + 1, 'of')
+      console.log('read chunk nr', currentChunk + 1, 'of', chunks)
 
       const chunk = e.target?.result
       if (chunk && typeof chunk !== 'string') {

@@ -39,16 +39,15 @@ router.get('/users', (ctx, next) => {
   })
   .get('/check', async (ctx, next) => {
     const query = ctx.request.query
-    const filename = query.filename
-    const fileMd5 = query.fileMd5
-    getChunkList(
+    const filename = query.fileName
+    const fileMd5 = query.fileMd5Value
+    console.log(constants.uploadPath)
+    const data = await utils.getChunkList(
       path.join(constants.uploadPath, filename),
       path.join(constants.uploadPath, fileMd5),
-      (data) => {
-        ctx.body = data
-        next()
-      }
     )
+    ctx.body = data
+    next()
   })
   .get('/merge', async (ctx, next) => {
     const fileName = ctx.request.query.fileName
@@ -77,19 +76,5 @@ app
   .use(bodyParser())
   .use(router.routes())
   .use(router.allowedMethods())
-
-// app
-//   // .use(bodyParser())
-//   .use(koaBody({
-//     multipart: true,
-//     formidable: {
-//       // uploadDir: path.join(__dirname, 'public/uploads'),
-//       // keepExtensions: true,
-//       // multipart: true,
-//       maxFileSize: 200 * 1024 * 1024
-//     },
-//   }))
-//   .use(router.routes())
-//   .use(router.allowedMethods())
 
 http.createServer(app.callback()).listen(8000);
